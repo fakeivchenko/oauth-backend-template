@@ -6,6 +6,7 @@ import com.github.sbooster.templates.oauthbackend.core.example.model.Credentials
 import com.github.sbooster.templates.oauthbackend.core.example.model.oauth.OAuth;
 import com.github.sbooster.templates.oauthbackend.core.example.model.oauth.OAuthRegistration;
 import com.github.sbooster.templates.oauthbackend.core.example.service.OAuthRegistrationService;
+import com.github.sbooster.templates.oauthbackend.util.OAuthUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -60,7 +61,7 @@ public class FacebookOAuthController {
         return oAuthRegistrationService.getByProviderId(facebookUserData.id, OAuthRegistration.Provider.FACEBOOK)
                 .onErrorResume(ignored -> {
                     return credentialsService.getByUsername(facebookUserData.email)
-                            .onErrorResume(e -> credentialsService.create(facebookUserData.email, "pass"))
+                            .onErrorResume(e -> credentialsService.create(facebookUserData.email, OAuthUtils.generateRandomPassword()))
                             .flatMap(credentials -> oAuthRegistrationService.create(credentials.getId(), facebookUserData.id, OAuthRegistration.Provider.FACEBOOK));
                 })
                 .flatMap(oAuthRegistration -> credentialsService.getById(oAuthRegistration.getCredentialsId()))

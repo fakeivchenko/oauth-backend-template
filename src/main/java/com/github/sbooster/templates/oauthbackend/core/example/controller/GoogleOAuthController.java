@@ -7,6 +7,7 @@ import com.github.sbooster.templates.oauthbackend.core.example.model.oauth.OAuth
 import com.github.sbooster.templates.oauthbackend.core.example.service.CredentialsService;
 import com.github.sbooster.templates.oauthbackend.core.example.service.OAuthRegistrationService;
 import com.github.sbooster.templates.oauthbackend.core.example.model.oauth.OAuth;
+import com.github.sbooster.templates.oauthbackend.util.OAuthUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -63,7 +64,7 @@ public class GoogleOAuthController {
         return oAuthRegistrationService.getByProviderId(googleUserData.id, OAuthRegistration.Provider.GOOGLE)
                 .onErrorResume(ignored -> {
                     return credentialsService.getByUsername(googleUserData.email)
-                            .onErrorResume(e -> credentialsService.create(googleUserData.email, "pass"))
+                            .onErrorResume(e -> credentialsService.create(googleUserData.email, OAuthUtils.generateRandomPassword()))
                             .flatMap(credentials -> oAuthRegistrationService.create(credentials.getId(), googleUserData.id, OAuthRegistration.Provider.GOOGLE));
                 })
                 .flatMap(oAuthRegistration -> credentialsService.getById(oAuthRegistration.getCredentialsId()))
